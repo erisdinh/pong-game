@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Quynh Dinh's Pong Game</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body {
+                text-align: center;
+            }
+
+            #board {
+                margin-top: 30px;
+                margin-bottom: 30px;
+            }
+
+            button {
+                position: relative;
+                text-align: center;
+                margin: 0 auto;
+                cursor: pointer;
+                display: inline-block;
+                padding: 5px;
+                width: 100px;
+            }
+
+            table{
+                margin: 0 auto;
+                text-align: center;
+            }
+        </style>
+
+        <script type="text/javascript">
+            var xBall = 30;
+            var yBall = 250;
+            var yPaddle2 = 200;
+            var yPaddle1 = 200;
+            var xSpeed = 1;
+            var ySpeed = 1;
+
+            var score1 = 0;
+            var score2 = 0;
+
+            function startAnimation() {
+                timerId = setInterval(draw, 8);
+            }
+
+            function stopAnimation() {
+                clearTimeout(timerId);
+            }
+
+            function setupBoard() {
+                xBall = 30;
+                yBall = 250;
+                yPaddle2 = 200;
+                yPaddle1 = 200;
+                xSpeed = 1;
+                ySpeed = 1;
+                draw();
+            }
+
+            function draw() {
+                var cellScore1 = document.getElementById('score1');
+                var cellScore2 = document.getElementById('score2');
+                var buttonPlay = document.getElementById('play');
+
+                cellScore1.innerHTML = score1;
+                cellScore2.innerHTML = score2;
+
+                var board = document.getElementById('board');
+                var ctx = board.getContext("2d");
+
+                ctx.clearRect(0, 0, 1000, 500);
+
+                // draw the board
+                ctx.fillStyle = "grey";
+                ctx.fillRect(0, 0, 1000, 500);
+
+                // draw the first paddle
+                ctx.fillStyle = "blue";
+                ctx.fillRect(0, yPaddle1, 20, 100);
+
+                // draw the second paddle
+                ctx.fillStyle = "blue";
+                ctx.fillRect(980, yPaddle2, 20, 100);
+
+                // draw the net
+                ctx.fillStyle = "black";
+                ctx.beginPath();
+                ctx.moveTo(500, 0);
+                ctx.lineTo(500, 500);
+                ctx.strokeStyle = "white";
+                ctx.closePath();
+                ctx.stroke()
+
+                // draw a ball
+                ctx.strokeStyle = "green";
+                ctx.fillStyle = "green";
+                ctx.beginPath();
+                ctx.arc(xBall, yBall, 10, 0, Math.PI * 2, true);
+                ctx.closePath();
+                ctx.stroke();
+                ctx.fill();
+
+                if (yBall == 10) {
+                    ySpeed = 1;
+                }
+                if (yBall == 490) {
+                    ySpeed = -1;
+                }
+
+                if (xBall == 30) {
+                    if (yBall > yPaddle1 && yBall < yPaddle1 + 100) {
+                        xSpeed = 1;
+                    }
+                }
+                if (xBall == 970) {
+                    if (yBall > yPaddle2 && yBall < yPaddle2 + 100) {
+                        xSpeed = -1;
+                    }
+                }
+
+                xBall = xBall + xSpeed;
+                yBall = yBall + ySpeed;
+
+                if (xBall >= 990 || xBall <= 10) {
+                    if (xBall >= 990) {
+                        score1 = score1 + 1;
+                    } else if (xBall <= 10) {
+                        score2 = score2 + 1;
+                    }
+                    clearTimeout(timerId);
+                    cellScore1.innerHTML = score1;
+                    cellScore2.innerHTML = score2;
+                    buttonPlay.innerHTML = "Play Again!";
+                }
+            }
+
+            window.addEventListener("load", function (event) {
+                function mouseMove(event) {
+                    var board = document.getElementById('board');
+                    if (event.pageY - board.offsetTop < 0) {
+                        yPaddle2 = 0;
+
+                    } else if (event.pageY - board.offsetTop > 400) {
+                        yPaddle2 = 400;
+                    } else {
+                        yPaddle2 = event.pageY - board.offsetTop;
+                    }
+                }
+                document.querySelector("body").onmousemove = mouseMove;
+            });
+
+            window.addEventListener("load", function (event) {
+                function keyMove(event) {
+                    var board = document.getElementById('board');
+                    if (event.keyCode == 38) {
+                        if (yPaddle1 - 30 < 0) {
+                            yPaddle1 = 0;
+                        } else {
+                            yPaddle1 = yPaddle1 - 30;
+                        }
+                    } else if (event.keyCode == 40) {
+                        if (yPaddle1 + 30 > 400) {
+                            yPaddle1 = 400;
+                        } else {
+                            yPaddle1 = yPaddle1 + 30;
+                        }
+                    }
+                    console.log(yPaddle1);
+                }
+                document.querySelector("body").onkeydown = keyMove;
+            });
+
+            function newRound() {
+                setupBoard();
+                draw();
+                startAnimation();
+            }
+
+            function reset() {
+                score1 = 0;
+                score2 = 0;
+                int = 8;
+                newRound();
+            }
+
+        </script>
+    </head>
+    <body onload="draw()">
+        <h2>Pong Game</h2>
+        <div>
+            <h4>Player 1: Keyboard: Up (&#8593), Down (&#8595)</h4>
+            <h4>Player 2: Mouse</h4>
+        </div>
+        <table border="1">
+            <tr>
+                <td>Player 1</td>
+                <td>Player 2</td>
+            </tr>
+            <tr>
+                <td id="score1">0</td>
+                <td id="score2">0</td>
+            </tr>
+        </table>
+        <canvas id="board" width=1000 height=500></canvas>
+        </br>
+        <button id="play" onclick="newRound()">Play</button>
+        <button id="reset" onclick="reset()">Reset</button>
+    </body>
+</html>
